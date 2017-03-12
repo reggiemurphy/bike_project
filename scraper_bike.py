@@ -1,25 +1,16 @@
-import sys
-import logging
-import rds_config
+import pymysql.cursors
 import pymysql
 
+# Connect to the database
+conn = pymysql.connect(host='bikebikebaby2.c1ecxudgvgy2.us-west-2.rds.amazonaws.com',
+                             user='administrator',
+                             password='bikebikebaby2',
+                             db='bikebikebaby2',
+                             charset='utf8mb4',
+                             cursorclass=pymysql.cursors.DictCursor)
 
-rds_host = rds_config.bikebikebaby2.c1ecxudgvgy2.us-west-2.rds.amazonaws.com:3306
-name = rds_config.administrator
-password = rds_config.bikebikebaby2
-db_name = rds_config.bikebikebaby2
-port = 3306
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+c = conn.cursor()
 
+'''Insert MySQL Here'''
 
-try:
- conn = pymysql.connect(rds_host, user=name,
- passwd=password, db=db_name, connect_timeout=5)
-
-
- # Adding to database goes here???
-
-except:
- logger.error("ERROR: Unexpected error: Could not connect to MySql instance.")
- sys.exit()
+conn.close()

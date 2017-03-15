@@ -35,8 +35,13 @@
                 }
             };
 
-            var chart = new google.visualization.BarChart(document.getElementById('daily_chart_div'));
-            chart.draw(data, options);
+            // Create. draw the charts and select the div where they are to be included
+            var pie_chart = new google.visualization.PieChart(document.getElementById('daily_chart_div'));
+            var bar_chart = new google.visualization.BarChart(document.getElementById('weekly_chart_div'));
+            var line_chart = new google.visualization.LineChart(document.getElementById('occupancy_chart_div'));
+            pie_chart.draw(data, options);
+            bar_chart.draw(data, options);
+            line_chart.draw(data, options);
     }
     </script>
 	</head>
@@ -45,8 +50,8 @@
 		<h1>Dublin Bikes</h1>
 		<div class='left'>
 			<div id="daily_chart_div"></div>
-            <div id="weekly_chart_div">I am going to be the average weekly chart</div>
-            <div id="occupancy_chart_div">I am going to be the average occupancy chart</div>
+            <div id="weekly_chart_div"></div>
+            <div id="occupancy_chart_div"></div>
 		</div>
 
 		<div class='right'>

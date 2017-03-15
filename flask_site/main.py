@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from flask import Flask, render_template
-import urllib
 import json
 import requests
 import traceback

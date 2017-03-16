@@ -4,5 +4,5 @@ class StandInfo:
     def __init__(self, total, available, time):
         self.total = int(total)
         self.available = int(available)
-        self.time = str(time)
+        self.time = str(time)[0:-3]
         self.bikes = self.total - self.available

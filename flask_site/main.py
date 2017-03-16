@@ -33,6 +33,8 @@ def BikeDB_example():
     # -- current_info.time -> time 
     full_day_info = db.get_day('Greek Street')
 
+    return current_info
+
 
 #--------------------------------------------------------------------------#
 # Function to return the temperature data
@@ -67,12 +69,12 @@ app = Flask(__name__)
 # Index Page
 @app.route('/')
 def index():
-    BikeDB_example()
+    info = BikeDB_example()
     weather = get_weather_data()
     return render_template('index.html', **locals())
 
 
 #--------------------------------------------------------------------------#
-# Setting app to run only if this file is run directly. 
+# Setting app to run only if this file is run directly.
 if __name__ == '__main__':
-    app.run(debug = True)
+    app.run(debug=True)

@@ -39,25 +39,21 @@
             // draws it.
             function drawChart() {
                 var data = google.visualization.arrayToDataTable([
-                ['Temp', 'Temperature', { role: 'style' }],
-                ['Current Min Temp', {{weather[0]}}, 'gold'],
-                ['Current Avg. Temp', {{weather[1]}}, 'silver'],
-                ['Current Max Temp', {{weather[2]}}, 'brown']
-            ]);
+                    ['Time', 'Bikes Available', 'Bike Stands'],
+                    ['5.00', {{info.bikes}}, {{info.available}}],
+                    ['5.30', {{info.bikes}}, {{info.available}}],
+                    ['6.00', {{info.bikes}}, {{info.available}}],
+                    ['6.30', {{info.bikes}}, {{info.available}}]
+            ], false); // False means that the first row contains labels, not data
 
             var options = {
-                title: 'Temperature overview',
-                chartArea: {width: '50%'},
-                hAxis: {
-                title: 'Kelvin',
-                minValue: 0
-                },
-                vAxis: {
-                title: 'Temps'
-                }
+                title: 'Greek St. Info',
+                chartArea: {width: '60%'},
+                hAxis: { title: 'Time', minValue: 0 },
+                vAxis: { title: 'Bike Numbers' }
             };
 
-            // Create. draw the charts and select the div where they are to be included
+            // Create & draw the charts & where they are to be put
             var pie_chart = new google.visualization.PieChart(document.getElementById('daily_chart_div'));
             var bar_chart = new google.visualization.BarChart(document.getElementById('weekly_chart_div'));
             var line_chart = new google.visualization.LineChart(document.getElementById('occupancy_chart_div'));
@@ -67,6 +63,9 @@
     }
     	</script>
 	</head>
+
+    <!--------------------------------------------------------------------------------------------------------->
+
 	<body>
 		<h1>Dublin Bikes</h1>
 		<div class='left'>

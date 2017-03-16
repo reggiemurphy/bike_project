@@ -24,8 +24,16 @@ h3 {
 
 p {
 	color: #022b3a;
-	padding: 1px;
 	margin: 0;
+}
+
+div.right {
+    background: ghostwhite;
+	width: 820px;
+	height: 600px;
+	margin: 0;
+	padding: 0;
+	float: right;
 }
 
 div.left {
@@ -35,13 +43,4 @@ div.left {
 	margin: 0;
 	padding: 0;
 	float: left;
-}
-
-div.right {
-	background: ghostwhite;
-	width: 820px;
-	height: 600px;
-	margin: 0;
-	padding: 0;
-	float: right;
 }

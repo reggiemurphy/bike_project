@@ -31,6 +31,7 @@
                     chartArea: {width: '95%', height: '80%'},
                     pieSliceText: 'value',
                     fontName: 'Verdana',
+                    fontSize: 10,
                     color: '#022b3a;',
                     backgroundColor: 'transparent',
                     colors: ['#4682b4', '#b0c4de'],
@@ -75,21 +76,41 @@
             function myMap() {
                 var myCenter = new google.maps.LatLng(53.3498,-6.2603);
                 var mapCanvas = document.getElementById("googleMap");
-                var mapOptions = {center: myCenter, zoom: 12};
+                var mapOptions = {
+                    center: myCenter, 
+                    zoom: 13
+                };
                 var map = new google.maps.Map(mapCanvas, mapOptions);
 
-                //Set Markers For Stations On Map
-                //Start loop here when we have the information read in...
+                // Loop through station info.
+                {% for info in station_info %}
+                // Creating Marker
                 var marker = new google.maps.Marker({
-                    position: {lat: 53.3498, lng: -6.2603},
+                    position: {lat: {{ info.lat }}, lng: {{ info.long }}},
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        strokeColor: '#4682b4',
+                        strokeWeight: 1.5,
+                        fillColor: '#b0c4de',
+                        fillOpacity: 0.5,
+                        scale: 8
+                    },
                     map: map,});
-                    google.maps.event.addListener(marker,'click',function() {
-                        var infowindow = new google.maps.InfoWindow({
-                        content:"Station information will appear with this click..."
-                        });
-                    infowindow.open(map,marker);
-                });
+                // Mouse Over Functionality
+                var infowindow;
+                google.maps.event.addListener(marker,'mouseover',function() {
+                    infowindow = new google.maps.InfoWindow({
+                        content: '{{ info.name }}'
+                    });
+                    infowindow.open(map, this);
+                }); 
+                // Mouse Off Functionality
+                google.maps.event.addListener(marker,'mouseout',function() {
+                    infowindow.close();
+                }); 
+                {% endfor %}
             }
+
         </script>
 	</head>
 

@@ -17,17 +17,18 @@ h1 {
 }
 
 h2 {
-	color: #022b3a;
+    background: steelblue;
+	color: ghostwhite;
     margin: 0;
     padding: 10px;
 }
 
 h5 {
-    color: #666666;
+    color: #022b3a;
     text-align: center;
     font-size: 12px;
     margin: 0;
-    margin-top: 25px;
+    margin-top: 35px;
     padding: 0;
 }
 
@@ -47,4 +48,10 @@ div.left {
 	margin: 0;
 	padding: 0;
 	float: left;
+}
+
+.gm-style-iw + div {display: none;}
+
+.gm-style-iw {
+    font-family: Verdana, Geneva, sans-serif;
 }

@@ -7,7 +7,7 @@ def main():
     # Creating HalfHourlyInfo table. 
     write_db(half_hourly_info(), 'HalfHourlyInfo')
 
-    # Creating StationInfo table, commented out - as doesn't need to be changed.  
+    # Creating StationInfo table, commented out - as doesn't need to be updated.  
     #write_db(station_info(), 'StationInfo')
 
 
@@ -29,6 +29,10 @@ def half_hourly_info():
     # Grouping by address and time. 
     df = df.groupby(['address', 'last_update']).mean().round(0)
 
+    # Order by station name / time. 
+    df = df.reset_index()
+    df.sort_values(by=['address', 'last_update'], inplace=True)
+
     # Returning dataframe. 
     return df
 
@@ -44,6 +48,11 @@ def station_info():
 
     # Dropping duplicate rows. 
     df = df.drop_duplicates()
+
+    # Order by station name. 
+    df = df.reset_index()
+    df.sort_values(by='address', inplace=True)
+
 
     # Returning dataframe. 
     return df

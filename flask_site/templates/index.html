@@ -100,7 +100,10 @@
                 var infowindow;
                 google.maps.event.addListener(marker,'mouseover',function() {
                     infowindow = new google.maps.InfoWindow({
-                        content: '{{ info.name }}'
+                        content: '<h4>{{ info.name }}</h4>' +
+                        '<p><b style="padding-right: 5em;">Total Stands:</b> {{ info.total }}</p>' + 
+                        '<p><b style="padding-right: 3.1em;">Available Stands:</b> {{ info.available }}</p>' + 
+                        '<p><b style="padding-right: 0.025em;">Unavailable Stands:</b> &emsp;&emsp;{{ info.bikes }}</p>'
                     });
                     infowindow.open(map, this);
                 }); 
@@ -109,6 +112,7 @@
                     infowindow.close();
                 }); 
                 {% endfor %}
+
             }
 
         </script>

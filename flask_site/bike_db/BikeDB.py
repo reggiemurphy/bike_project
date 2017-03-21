@@ -2,6 +2,8 @@ from .StandInfo import StandInfo
 from .StationInfo import StationInfo
 import pymysql
 import datetime
+import pymysql
+import datetime
 
 class BikeDB:
     '''Class that deals with querying DB.'''
@@ -15,23 +17,34 @@ class BikeDB:
         # Array that holds information relating to all stations. 
         info = []
 
+        # Getting current time, floored to half-hour.   
+        time = self.current_time_floored()
+
         # Connecting to DB. 
         self.open()
 
         # Creating cursor. 
-        c = self.conn.cursor()
+        c1 = self.conn.cursor()
         # Constructing SQL query. 
         query = "SELECT * FROM StationInfo"
         # Executing SQL query. 
-        c.execute(query)
+        c1.execute(query)
+
+        # Creating cursor. 
+        c2 = self.conn.cursor()
+        # Constructing SQL query. 
+        query = "SELECT bike_stands, available_bike_stands FROM HalfHourlyInfo WHERE time = '" + str(time) + "'"
+        # Executing SQL query. 
+        c2.execute(query)
 
         # Disconnecting from DB. 
         self.close()
 
         # Accessing rows returned from query. 
-        for row in c:
+        # SQL table is ordered in the data analytics stage, so no need to order results from the above two queries.
+        for row1, row2 in zip(c1, c2):
             # Storing data in an instance of StationInfo class. 
-            info.append(StationInfo(row[0], row[1], row[2]))
+            info.append(StationInfo(row1[0], row1[1], row1[2], row2[0], row2[1]))
 
         # Returning info 
         return info

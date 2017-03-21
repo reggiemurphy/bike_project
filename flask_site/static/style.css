@@ -23,6 +23,13 @@ h2 {
     padding: 10px;
 }
 
+h4 {
+    color: steelblue;
+    font-size: 14px;
+    margin: 0;
+    padding: 10px;
+}
+
 h5 {
     color: #022b3a;
     text-align: center;
@@ -30,6 +37,13 @@ h5 {
     margin: 0;
     margin-top: 35px;
     padding: 0;
+}
+
+p {
+    color: #022b3a;
+    font-size: 12px;
+    margin: 0;
+    padding: 10px;
 }
 
 div.right {
@@ -50,8 +64,8 @@ div.left {
 	float: left;
 }
 
-.gm-style-iw + div {display: none;}
-
-.gm-style-iw {
-    font-family: Verdana, Geneva, sans-serif;
+.gm-style-iw + div {
+    display: none;
 }
+
+

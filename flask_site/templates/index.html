@@ -4,30 +4,45 @@
 		<title>Dublin Bikes</title>
 		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
         <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 
         <!-- JavaScript -->
         <script type="text/javascript">
+        // Load the Visualization API and the ColumnChart package.
+        google.load('visualization', '1', {'packages':['corechart']});
+
+        // Waiting until document is ready before we start using AJAX. 
+        $(document).ready(function() {
+            // Initial station to be displayed.
+            var station = 'Heuston Station (Central)';
+
+            // Display station
+            update(station);
+        });
+
+
+        //#--------------------------------------------------------------------------#//
+        // Updates the station currently being displayed. 
+        function update(station) {
+            // Setting heading
+            document.getElementById("heading").innerHTML = station;
+
+            // Draw Pie Chart
+            drawPieChart(station);
             
-            // Load the Visualization API and the ColumnChart package.
-            google.load('visualization', '1', {'packages':['corechart']});
-
-            // Set a callback to run when the Google Visualization API is loaded.
-            google.setOnLoadCallback(drawPieChart);
-            google.setOnLoadCallback(drawLineChart);
+            // Draw Line Graph
+            drawLineGraph(station);
+        }
 
 
-            //#--------------------------------------------------------------------------#//
-            // Creates + populates table for piechart, draws piechart. 
-            function drawPieChart() {
-                // Setting values
-                var data = google.visualization.arrayToDataTable([
-                    // What does this line do?
-                    ['', '', { role: 'style' }], 
-                    ['Spaces Available', {{ current_info.available }}, 'gold'], 
-                    ['Spaces Unavailable', {{ current_info.bikes }}, 'silver']]);
+        //#--------------------------------------------------------------------------#//
+        // Draws the line graph, depicting occupancy for the full day.
+        function drawPieChart(station) {
+            // Replacing spaces in station name with underscores. 
+            station = encodeURIComponent(station);
 
-                var options = {
+            // Pie chart options
+            var options = {
                     chartArea: {width: '95%', height: '80%'},
                     pieSliceText: 'value',
                     fontName: 'Verdana',
@@ -37,97 +52,161 @@
                     colors: ['#4682b4', '#b0c4de'],
                     pieStartAngle: 90,};
 
-                // Create. draw the charts and select the div where they are to be included
-                var pie_chart = new google.visualization.PieChart(document.getElementById('current_chart_div'));
-                pie_chart.draw(data, options);
-            }
+            // Initializing pie chart
+            var pie_chart = new google.visualization.PieChart(document.getElementById('current_chart_div'));
+
+            // API Call
+            $.getJSON('http://localhost:5000/api/current/' + station, function(json) {
+                // Drawing pie chart.
+                pie_chart.draw(formatCurrent(json), options);
+            });
+        }
 
 
-            //#--------------------------------------------------------------------------#//
-            // Creates + populates table for linechart, draws linechart. 
-            function drawLineChart() {
-                // Formatting data from Python. 
-                var array = [['Time', 'Empty Spaces']];
-                {% for info in full_day_info %}
-                var temp_array = ['{{ info.time }}', {{ info.available }}];
-                array.push(temp_array);
-                {% endfor %}
-
-                // Setting values
-                var data = google.visualization.arrayToDataTable(array);
-
-                 var options = {
+        //#--------------------------------------------------------------------------#//
+        // Draws the line graph, depicting occupancy for the full day.
+        function drawLineGraph(station) {
+            // Replacing spaces in station name with underscores. 
+            station = encodeURIComponent(station);
+            
+            // Line graph options
+            var options = {
                     chartArea: {width: '80%', height: '69%'},
-                    pieSliceText: 'value',
                     fontName: 'Verdana',
                     color: '#022b3a;',
                     backgroundColor: 'transparent',
                     colors: ['#4682b4', '#b0c4de'],
                     curveType: 'function',
-                    legend: {position: 'top', textStyle: {fontSize: 10}}};
-
-                var line_chart = new google.visualization.LineChart(document.getElementById('day_chart_div'));
-                line_chart.draw(data, options);
-            }
-
-
-            //#--------------------------------------------------------------------------#//
-            //Set Google Map Properties
-            function myMap() {
-                var myCenter = new google.maps.LatLng(53.3498,-6.2603);
-                var mapCanvas = document.getElementById("googleMap");
-                var mapOptions = {
-                    center: myCenter, 
-                    zoom: 13
+                    legend: {position: 'top', textStyle: {fontSize: 10}}
                 };
-                var map = new google.maps.Map(mapCanvas, mapOptions);
 
-                // Loop through station info.
-                {% for info in station_info %}
-                // Creating Marker
-                var marker = new google.maps.Marker({
-                    position: {lat: {{ info.lat }}, lng: {{ info.long }}},
-                    icon: {
-                        path: google.maps.SymbolPath.CIRCLE,
-                        strokeColor: '#4682b4',
-                        strokeWeight: 1.5,
-                        fillColor: '#b0c4de',
-                        fillOpacity: 0.5,
-                        scale: 8
-                    },
-                    map: map,});
-                // Mouse Over Functionality
-                var infowindow;
-                google.maps.event.addListener(marker,'mouseover',function() {
-                    infowindow = new google.maps.InfoWindow({
-                        content: '<h4>{{ info.name }}</h4>' +
-                        '<p><b style="padding-right: 5em;">Total Stands:</b> {{ info.total }}</p>' + 
-                        '<p><b style="padding-right: 3.1em;">Available Stands:</b> {{ info.available }}</p>' + 
-                        '<p><b style="padding-right: 0.025em;">Unavailable Stands:</b> &emsp;&emsp;{{ info.bikes }}</p>'
-                    });
-                    infowindow.open(map, this);
-                }); 
-                // Mouse Off Functionality
-                google.maps.event.addListener(marker,'mouseout',function() {
-                    infowindow.close();
-                }); 
-                {% endfor %}
+            // Initializing line graph.
+            var line_chart = new google.visualization.LineChart(document.getElementById('day_chart_div'));
 
+            // API Call
+            $.getJSON('http://localhost:5000/api/day/' + station, function(json) {
+                // Drawing line graph
+                line_chart.draw(formatDay(json), options);
+            });
+        }
+
+
+        //#--------------------------------------------------------------------------#//
+        // Formats current data for pie chart.
+        // Takes a JSON file as input, returns a DataTable.
+        function formatCurrent(json) {
+            // Array to hold values for pie chart.
+            var array = [['State', 'Number']];
+
+            // Pushing an array of two elements (time, stands available) to array.
+            array.push(['Spaces Available', json.current.available]);
+            array.push(['Spaces Unavailable', json.current.bikes]);
+
+            // Returning array, formatted as data table.
+            return google.visualization.arrayToDataTable(array);
+        }
+
+
+        //#--------------------------------------------------------------------------#//
+        // Formats full day data for line graph.
+        // Takes a JSON file as input, returns a DataTable.
+        function formatDay(json) {
+            // Array to hold values for line graph.
+            var array = [['Time', 'Empty Spaces']];
+
+            // Looping through elements in JSON file.
+            for (var i = 0; i < json.times.length; i++) {
+                // Pushing an array of two elements (time, stands available) to array.
+                array.push([json.times[i].time, json.times[i].available]);
             }
 
+            // Returning array, formatted as data table.
+            return google.visualization.arrayToDataTable(array);
+        }
+
+
+        //#--------------------------------------------------------------------------#//
+        // Google Map
+        function myMap() {
+            // Centre of map
+            var myCenter = new google.maps.LatLng(53.3498,-6.2603);
+
+            // Initializing canvas
+            var mapCanvas = document.getElementById("googleMap");
+
+            // Map options
+            var mapOptions = {
+                center: myCenter, 
+                zoom: 13
+            };
+
+            // Creating map
+            var map = new google.maps.Map(mapCanvas, mapOptions);
+
+            // API Call
+            $.getJSON('http://localhost:5000/api/stations', function(json) {
+                // Looping through elements in JSON file.
+                for (var i = 0; i < json.stations.length; i++) {
+                    // Creating Marker
+                    var marker = new google.maps.Marker({
+                        position: {lat: json.stations[i].lat, lng: json.stations[i].lng},
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            strokeColor: '#4682b4',
+                            strokeWeight: 1.5,
+                            fillColor: '#b0c4de',
+                            fillOpacity: 0.5,
+                            scale: 8
+                        },
+                        map: map,});
+
+                    
+                    // Create infowindow on mouseover
+                    var infowindow = new google.maps.InfoWindow();
+
+                    // Contents of infowindow
+                    var html = '<h4>' + json.stations[i].name + '</h4>' +
+                        '<p><b style="padding-right: 5em;">Total Stands:</b>' + json.stations[i].total + '</p>' + 
+                        '<p><b style="padding-right: 3.1em;">Available Stands:</b>' + json.stations[i].available + '</p>' + 
+                        '<p><b style="padding-right: 0.025em;">Unavailable Stands:</b> &emsp;&emsp;' + json.stations[i].bikes + '</p>'
+                    marker.html = html;
+
+                    // Name of station
+                    marker.name = json.stations[i].name;
+
+                    // Mouse Over Functionality
+                    google.maps.event.addListener(marker,'mouseover',function() {
+                        // Set contents
+                        infowindow.setContent(this.html);
+                        // Open infowindow
+                        infowindow.open(map, this);
+                    }); 
+
+                    // Mouse Off Functionality
+                    google.maps.event.addListener(marker,'mouseout',function() {
+                        // Close infowindow
+                        infowindow.close();
+                    }); 
+
+                    // Mouse Click Functionality
+                    google.maps.event.addListener(marker,'click',function() {
+                        update(this.name);
+                    }); 
+                }
+            });
+        }
         </script>
 	</head>
 
 	<body>
 		<h1>Dublin Bikes</h1>
 		<div class='left'>
-            <h2>{{ station }}</h2>
+            <h2 id='heading'></h2>
             <!--Charts-->
             <h5>Current Occupancy</h5>
 			<div id="current_chart_div"></div>
             <h5>Occupancy By Time</h5>
             <div id="day_chart_div"></div>
-            <div id="occupancy_chart_div"></div>
 		</div>
 
 		<div class="right">

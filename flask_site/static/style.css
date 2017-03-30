@@ -23,6 +23,10 @@ h2 {
     padding: 10px;
 }
 
+h3 {
+    float: right;
+}
+
 h4 {
     color: steelblue;
     font-size: 14px;

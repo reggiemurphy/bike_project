@@ -1,5 +1,6 @@
 from flask import Flask, render_template, jsonify
 from bike_db.BikeDB import BikeDB
+from scraper.__main__ import scrape_weather
 
 # View site @ http://localhost:5000/
 #--------------------------------------------------------------------------#
@@ -11,8 +12,8 @@ app = Flask(__name__)
 # Index Page
 @app.route('/')
 def index():
+    weather_desc, weather_sum, temp = scrape_weather()
     return render_template('index.html', **locals())
-
 
 
 #=================================== API ==================================#

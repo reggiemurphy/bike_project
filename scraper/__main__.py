@@ -62,7 +62,7 @@ def scrape_weather():
     temp = data['main']['temp']
 
     # Returning Summary
-    return weather_main, weather_description, temp
+    return weather_main, weather_description, "{0:.2f}".format(temp - 273.15) + "'C"
 
 
 

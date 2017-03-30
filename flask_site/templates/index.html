@@ -8,6 +8,11 @@
 
         <!-- JavaScript -->
         <script type="text/javascript">
+
+        //Get current live temperature and weather summary
+        var temp_j = "{{ temp }}";
+        var weather_j = "{{ weather_desc }}";
+
         // Load the Visualization API and the ColumnChart package.
         google.load('visualization', '1', {'packages':['corechart']});
 
@@ -18,7 +23,43 @@
 
             // Display station
             update(station);
+
+            // Show Live Weather On Load
+            weather_icon(weather_j);
+            weather_summary(weather_j, temp_j)
         });
+
+
+        //#--------------------------------------------------------------------------#//
+
+        // Display live weather Icon at initial time of page load
+        function weather_icon(weather_sum) {
+            //Set variable for Icon Div
+            var temp = document.getElementById("Weather_Icon");
+
+            // Fetch and Display Open Weather Icon Depending On Weather Summary
+            if (weather_sum == "Haze") {
+                temp.innerHTML = "<img src='http://openweathermap.org/img/w/04d.png'>";
+            } else if (weather_sum == "Clear") {
+                temp.innerHTML = "<img src='http://openweathermap.org/img/w/01d.png'>";
+            } else if (weather_sum =="Mist") {
+                temp.innerHTML = "<img src='http://openweathermap.org/img/w/50d.png'>";
+            } else if (weather_sum =="Fog") {
+                temp.innerHTML = "<img src='http://openweathermap.org/img/w/50d.png'>";
+            } else if (weather_sum =="Clouds") {
+                temp.innerHTML = "<img src='http://openweathermap.org/img/w/03d.png'>";
+            } else if (weather_sum =="Rain") {
+                temp.innerHTML = "<img src='http://openweathermap.org/img/w/10d.png'>";
+            } else {
+                alert("Error: No Matching Weather Summary Found for Icon");
+            }
+        }
+
+        // Display live weather summary at initial time of page load
+        function weather_summary(weather_sum, temperature) {
+            var temp = document.getElementById("Weather_Sum");
+            temp.innerHTML = weather_sum + " " + temperature;
+        }
 
 
         //#--------------------------------------------------------------------------#//
@@ -195,11 +236,16 @@
                 }
             });
         }
+
         </script>
+
 	</head>
 
 	<body>
 		<h1>Dublin Bikes</h1>
+        <h3 id="Weather_Icon">Icon Here</h3>
+		<h3 id="Weather_Sum">Weather summary here</h3>
+
 		<div class='left'>
             <h2 id='heading'></h2>
             <!--Charts-->

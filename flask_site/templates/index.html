@@ -35,7 +35,7 @@
         // Display live weather Icon at initial time of page load
         function weather_icon(weather_sum) {
             //Set variable for Icon Div
-            var temp = document.getElementById("Weather_Icon");
+            var temp = document.getElementById("weather_icon");
 
             // Fetch and Display Open Weather Icon Depending On Weather Summary
             if (weather_sum == "Haze") {
@@ -57,7 +57,7 @@
 
         // Display live weather summary at initial time of page load
         function weather_summary(weather_sum, temperature) {
-            var temp = document.getElementById("Weather_Sum");
+            var temp = document.getElementById("weather_sum");
             temp.innerHTML = weather_sum + " " + temperature;
         }
 
@@ -242,12 +242,21 @@
 	</head>
 
 	<body>
-		<h1>Dublin Bikes</h1>
-        <h3 id="Weather_Icon">Icon Here</h3>
-		<h3 id="Weather_Sum">Weather summary here</h3>
+        <nav>
+                <ul>
+                    <li><h1>Dublin Bikes</h1></li>
+                    <li><div id="weather_icon"></div></li>
+                    <li><div id="weather_sum"></div></li>
+                </ul>
+        </nav>
 
 		<div class='left'>
             <h2 id='heading'></h2>
+            <!--Buttons-->
+            <div class='buttons'>
+                <div id='dry_btn'>Dry</div>
+                <div id='wet_btn'>Wet</div>
+            </div>
             <!--Charts-->
             <h5>Current Occupancy</h5>
 			<div id="current_chart_div"></div>

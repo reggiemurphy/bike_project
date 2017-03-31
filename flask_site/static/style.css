@@ -7,13 +7,27 @@ body {
     filter: drop-shadow(0px 1px 1px #022b3a) ;
 }
 
-h1 {
-	background: #022b3a;
-	color: ghostwhite;
-	margin: 0;
-	padding: 10px;
-	border-top-left-radius: 10px;
+nav{
+    background: #022b3a;
+    border-top-left-radius: 10px;
 	border-top-right-radius: 10px;
+    margin: 0;
+	padding: 10px;
+}
+
+nav ul{
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+nav li{
+    display: inline;
+}
+
+h1 {
+	color: ghostwhite;
+    display: inline;
 }
 
 h2 {
@@ -66,6 +80,51 @@ div.left {
 	margin: 0;
 	padding: 0;
 	float: left;
+}
+
+div#weather_icon, div#weather_sum{
+    color: ghostwhite;
+    float: right;
+}
+
+div#weather_sum{
+    padding: 15px 5px 0 0;
+}
+
+div#weather_icon{
+    height: 30px;
+    width: 30px;
+    padding: 0 15px 0 0;
+}
+
+div#dry_btn {
+    color: ghostwhite;
+    text-align: center;
+    transition-duration: 0.4s;
+    width: 49%;
+    background-color: palevioletred;
+    float: left;
+    border: 3px solid palevioletred;
+}
+
+div#wet_btn {
+    color: ghostwhite;
+    text-align: center;
+    transition-duration: 0.4s;
+    width: 49%;
+    background-color: cornflowerblue;
+    float: right;
+    border: 3px solid cornflowerblue;
+}
+
+div#dry_btn:hover{
+    background-color: ghostwhite;
+    color: palevioletred;
+}
+
+div#wet_btn:hover{
+    background-color: ghostwhite;
+    color: cornflowerblue;
 }
 
 .gm-style-iw + div {

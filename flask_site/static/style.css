@@ -120,15 +120,15 @@ div#wet_btn {
 div#dry_btn:hover{
     background-color: ghostwhite;
     color: palevioletred;
+    cursor: pointer;
 }
 
 div#wet_btn:hover{
     background-color: ghostwhite;
     color: cornflowerblue;
+    cursor: pointer;
 }
 
 .gm-style-iw + div {
     display: none;
 }
-
-

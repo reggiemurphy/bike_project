@@ -5,7 +5,7 @@ import pymysql
 #--------------------------------------------------------------------------#
 def main():
     # Creating HalfHourlyInfo table. 
-    write_db(half_hourly_info(), 'HalfHourlyInfo')
+    write_db(half_hourly_info(), 'HalfHourlyInfo_WithWeather')
 
     # Creating StationInfo table, commented out - as doesn't need to be updated.  
     #write_db(station_info(), 'StationInfo')
@@ -14,11 +14,15 @@ def main():
 #--------------------------------------------------------------------------#
 def half_hourly_info():
     '''Function that returns dataframe containing bike info for each station in half hour increments.'''
-     # Loading Data. 
+    # Loading data from DB. 
     df = get_db()
 
+    # Loading dry weather categories. 
+    f = open('data_analytics/data/dry_weather.txt', 'r')
+    dry = f.read().split('/')
+
     # Dropping unnecessary columns
-    df.drop(df.columns[[0, 2, 3, 4, 7, 8, 9, 10]], axis=1, inplace=True)
+    df.drop(df.columns[[0, 2, 3, 4, 7, 8, 10]], axis=1, inplace=True)
 
     # Removing date information, only keeping time. 
     df['last_update'] = df['last_update'].dt.time
@@ -26,12 +30,15 @@ def half_hourly_info():
     # Flooring time to half hour increments.
     df['last_update'] = df['last_update'].apply(lambda d : round_time(d))
 
+    # Changing all weather descriptions to be either dry or wet.
+    df['weather_description'] = df['weather_description'].apply(lambda d : classify_weather(d, dry))
+
     # Grouping by address and time. 
-    df = df.groupby(['address', 'last_update']).mean().round(0)
+    df = df.groupby(['address', 'last_update', 'weather_description']).mean().round(0)
 
     # Order by station name / time. 
     df = df.reset_index()
-    df.sort_values(by=['address', 'last_update'], inplace=True)
+    df.sort_values(by=['weather_description', 'address', 'last_update'], inplace=True)
 
     # Returning dataframe. 
     return df
@@ -56,6 +63,17 @@ def station_info():
 
     # Returning dataframe. 
     return df
+
+
+#--------------------------------------------------------------------------#
+def classify_weather(weather, dry):
+    '''Function to group weather into being either dry or wet.'''
+    # Minutes is change to 0 if < 30, or 30 if >= 30. 
+    if (weather in dry):
+        return 'Dry'
+
+    else:
+        return 'Wet'
 
 
 #--------------------------------------------------------------------------#

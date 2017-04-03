@@ -1,12 +1,15 @@
 from flask import Flask, render_template, jsonify
 from bike_db.BikeDB import BikeDB
 from scraper.__main__ import scrape_weather
+from flask_cors import CORS
+
 
 # View site @ http://localhost:5000/
 #--------------------------------------------------------------------------#
 # Creating Flask App
 app = Flask(__name__)
-
+# Enable Cross Origin Resource Sharing
+CORS(app)
 
 #--------------------------------------------------------------------------#
 # Index Page
@@ -90,4 +93,4 @@ def get_station_info():
 #--------------------------------------------------------------------------#
 # Setting app to run only if this file is run directly. 
 if __name__ == '__main__':
-    app.run(debug = True)
+    app.run(debug=True)

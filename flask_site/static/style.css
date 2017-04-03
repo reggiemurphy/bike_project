@@ -101,7 +101,7 @@ div#dry_btn {
     color: ghostwhite;
     text-align: center;
     transition-duration: 0.4s;
-    width: 49%;
+    width: 225px;
     background-color: palevioletred;
     float: left;
     border: 3px solid palevioletred;
@@ -111,7 +111,7 @@ div#wet_btn {
     color: ghostwhite;
     text-align: center;
     transition-duration: 0.4s;
-    width: 49%;
+    width: 226px;
     background-color: cornflowerblue;
     float: right;
     border: 3px solid cornflowerblue;

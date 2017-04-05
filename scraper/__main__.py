@@ -43,7 +43,7 @@ def scrape_weather():
     # API URI 
     URI = 'http://api.openweathermap.org/data/2.5/weather'
     # API Parameters 
-    params = {'q': 'Dublin', 'appid': 'e9b71166c5c433f0066ecbf407c8d9dc'}
+    params = {'q': 'Dublin,IE', 'appid': 'e9b71166c5c433f0066ecbf407c8d9dc'}
 
     # Loading Data 
     try:

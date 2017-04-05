@@ -10,7 +10,7 @@ class ScraperDB:
         c = self.conn.cursor()
 
         # Statement to create database if it does not exist. 
-        c.execute("""CREATE TABLE IF NOT EXISTS BikeData(
+        c.execute("""CREATE TABLE IF NOT EXISTS BikeData_V2(
         id INT,
         address TEXT,
         lat FLOAT(9,6),
@@ -21,7 +21,7 @@ class ScraperDB:
         available_bikes INT,
         weather_main TEXT,
         weather_description TEXT,
-        temp FLOAT(6,3),
+        temp TEXT,
         last_update DATETIME,
         PRIMARY KEY (id, last_update)
         )""")
@@ -59,7 +59,7 @@ class ScraperDB:
         c = self.conn.cursor()
 
         # Statement to insert row into table. 
-        c.execute("INSERT IGNORE INTO BikeData VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", 
+        c.execute("INSERT IGNORE INTO BikeData_V2 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", 
             (int(number), station, float(lat), float(lng), status, int(total_stands), int(free_stands), int(free_bikes), weather_main, weather_description, str(temp), str(updated)))
 
         # Committing statement

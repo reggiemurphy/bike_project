@@ -8,10 +8,11 @@
 
         <!-- JavaScript -->
         <script type="text/javascript">
-
-        //Get current live temperature and weather summary
-        var temp_j = "{{ temp }}";
-        var weather_j = "{{ weather_desc }}";
+        // Global Variables - awful, right? Gonna remove them later (maybe).
+        // Mode 0: Display Dry Weather
+        // Mode 1: Display Wet Weather
+        var weather_mode = 1; // -1 means no mode as been assigned. 
+        var station_json = {};
 
         // Load the Visualization API and the ColumnChart package.
         google.load('visualization', '1', {'packages':['corechart']});
@@ -21,67 +22,88 @@
             // Initial station to be displayed.
             var station = 'Heuston Station (Central)';
 
-            // Display station
-            update(station);
+            // URL for API. 
+            var openweather_api = 'http://api.openweathermap.org/data/2.5/weather?q=Dublin,IE&units=metric&APPID=e9b71166c5c433f0066ecbf407c8d9dc';
 
-            // Show Live Weather On Load
-            weather_icon(weather_j);
-            weather_summary(weather_j, temp_j)
+            // API call to get current weather info.
+            $.getJSON(openweather_api, function(json) {     
+                // Get current weather info
+                var condition = json.weather[0].description;
+                var icon = json.weather[0].icon;
+                var temperature = json.main.temp;
+
+                // Binning weather conditions / setting mode. 
+                var condition_binned = 'Wet';
+                {% for dry_condition in dry_conditions %}
+                if ('{{ dry_condition }}' == condition) {
+                    condition_binned = 'Dry';
+                    weather_mode = 0;
+                }
+                {% endfor %}
+                condition = condition_binned;
+
+                // Display weather icon + summary
+                weather_icon(icon);
+                weather_summary(condition, temperature);
+
+                // Display station
+                update(station, weather_mode);
+            });
         });
 
 
         //#--------------------------------------------------------------------------#//
-
         // Display live weather Icon at initial time of page load
-        function weather_icon(weather_sum) {
-            //Set variable for Icon Div
-            var temp = document.getElementById("weather_icon");
-
-            // Fetch and Display Open Weather Icon Depending On Weather Summary
-            if (weather_sum == "Haze") {
-                temp.innerHTML = "<img src='http://openweathermap.org/img/w/04d.png'>";
-            } else if (weather_sum == "Clear") {
-                temp.innerHTML = "<img src='http://openweathermap.org/img/w/01d.png'>";
-            } else if (weather_sum =="Mist") {
-                temp.innerHTML = "<img src='http://openweathermap.org/img/w/50d.png'>";
-            } else if (weather_sum =="Fog") {
-                temp.innerHTML = "<img src='http://openweathermap.org/img/w/50d.png'>";
-            } else if (weather_sum =="Clouds") {
-                temp.innerHTML = "<img src='http://openweathermap.org/img/w/03d.png'>";
-            } else if (weather_sum =="Rain") {
-                temp.innerHTML = "<img src='http://openweathermap.org/img/w/10d.png'>";
-            } else {
-                alert("Error: No Matching Weather Summary Found for Icon");
-            }
-        }
-
-        // Display live weather summary at initial time of page load
-        function weather_summary(weather_sum, temperature) {
-            var temp = document.getElementById("weather_sum");
-            temp.innerHTML = weather_sum + " " + temperature;
+        function weather_icon(icon) {
+            // Set variable for Icon Div
+            var icon_div = document.getElementById("weather_icon");
+            // Insert icon
+            icon_div.innerHTML = "<img src='http://openweathermap.org/img/w/" + icon + ".png'>";
         }
 
 
         //#--------------------------------------------------------------------------#//
-        // Updates the station currently being displayed. 
-        function update(station) {
-            // Setting heading
-            document.getElementById("heading").innerHTML = station;
+        // Display live weather summary at initial time of page load
+        function weather_summary(weather_sum, temperature) {
+            var temp = document.getElementById("weather_sum");
+            temp.innerHTML = '<i>' + temperature + 'c</i> <b>' + weather_sum + '</b>';
+        }
 
-            // Draw Pie Chart
-            drawPieChart(station);
-            
-            // Draw Line Graph
-            drawLineGraph(station);
+
+        //#--------------------------------------------------------------------------#//
+        // Calls API for station json - draws graphs
+        function update(station, mode) {
+            // API Call
+            $.getJSON('http://localhost:5000/api/occupancy/' + encodeURIComponent(station), function(json) {
+                station_json = json;
+                // Setting heading
+                document.getElementById("heading").innerHTML = station;
+                button(mode);
+                draw(json, mode)
+            });
+        }
+
+
+        //#--------------------------------------------------------------------------#//
+        // Draws graphs
+        function draw(json, mode) {
+            // If Mode == 0 - draw dry graphs
+            if (mode == 0) {
+                drawPieChart(json.current_dry);
+                drawLineGraph(json.dry_day);
+            }
+
+            // Else, draw wet graphs
+            else {
+                drawPieChart(json.current_wet);
+                drawLineGraph(json.wet_day);
+            }
         }
 
 
         //#--------------------------------------------------------------------------#//
         // Draws the line graph, depicting occupancy for the full day.
-        function drawPieChart(station) {
-            // Replacing spaces in station name with underscores. 
-            station = encodeURIComponent(station);
-
+        function drawPieChart(json) {
             // Pie chart options
             var options = {
                     chartArea: {width: '95%', height: '80%'},
@@ -95,21 +117,14 @@
 
             // Initializing pie chart
             var pie_chart = new google.visualization.PieChart(document.getElementById('current_chart_div'));
-
-            // API Call
-            $.getJSON('http://localhost:5000/api/current/' + station, function(json) {
-                // Drawing pie chart.
-                pie_chart.draw(formatCurrent(json), options);
-            });
+            // Drawing pie chart
+            pie_chart.draw(formatCurrent(json), options);
         }
 
 
         //#--------------------------------------------------------------------------#//
         // Draws the line graph, depicting occupancy for the full day.
-        function drawLineGraph(station) {
-            // Replacing spaces in station name with underscores. 
-            station = encodeURIComponent(station);
-            
+        function drawLineGraph(json) {
             // Line graph options
             var options = {
                     chartArea: {width: '80%', height: '69%'},
@@ -118,17 +133,14 @@
                     backgroundColor: 'transparent',
                     colors: ['#4682b4', '#b0c4de'],
                     curveType: 'function',
-                    legend: {position: 'top', textStyle: {fontSize: 10}}
+                    legend: {position: 'top', textStyle: {fontSize: 10}},
+                    vAxis: {viewWindow: {max:50, min:0}}
                 };
 
             // Initializing line graph.
             var line_chart = new google.visualization.LineChart(document.getElementById('day_chart_div'));
-
-            // API Call
-            $.getJSON('http://localhost:5000/api/day/' + station, function(json) {
-                // Drawing line graph
-                line_chart.draw(formatDay(json), options);
-            });
+            // Drawing line graph
+            line_chart.draw(formatDay(json), options);
         }
 
 
@@ -140,8 +152,8 @@
             var array = [['State', 'Number']];
 
             // Pushing an array of two elements (time, stands available) to array.
-            array.push(['Spaces Available', json.current.available]);
-            array.push(['Spaces Unavailable', json.current.bikes]);
+            array.push(['Spaces Available', json.available]);
+            array.push(['Spaces Unavailable', json.bikes]);
 
             // Returning array, formatted as data table.
             return google.visualization.arrayToDataTable(array);
@@ -156,9 +168,9 @@
             var array = [['Time', 'Empty Spaces']];
 
             // Looping through elements in JSON file.
-            for (var i = 0; i < json.times.length; i++) {
+            for (var i = 0; i < json.length; i++) {
                 // Pushing an array of two elements (time, stands available) to array.
-                array.push([json.times[i].time, json.times[i].available]);
+                array.push([json[i].time, json[i].available]);
             }
 
             // Returning array, formatted as data table.
@@ -201,7 +213,6 @@
                         },
                         map: map,});
 
-                    
                     // Create infowindow on mouseover
                     var infowindow = new google.maps.InfoWindow();
 
@@ -231,10 +242,24 @@
 
                     // Mouse Click Functionality
                     google.maps.event.addListener(marker,'click',function() {
-                        update(this.name);
+                        update(this.name, weather_mode);
                     }); 
                 }
             });
+        }
+
+
+        //#--------------------------------------------------------------------------#//
+        // Button to switch between dry graphs and wet graphs
+        function button(mode) {
+            if (mode !== weather_mode) {
+                var button;
+                if (mode == 0) button = document.getElementById('dry_btn');
+                else if (mode == 1) button = document.getElementById('wet_btn');
+                button.setActive;
+                weather_mode = mode;
+                draw(station_json, mode); 
+            }
         }
 
         </script>
@@ -254,8 +279,8 @@
             <h2 id='heading'></h2>
             <!--Buttons-->
             <div class='buttons'>
-                <div id='dry_btn'>Dry</div>
-                <div id='wet_btn'>Wet</div>
+                <button id='dry_btn' onclick="button(0)">Dry</button>
+                <button id='wet_btn' onclick="button(1)"">Wet</button>
             </div>
             <!--Charts-->
             <h5>Current Occupancy</h5>

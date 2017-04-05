@@ -1,5 +1,4 @@
-from .StandInfo import StandInfo
-from .StationInfo import StationInfo
+from flask import jsonify
 import pymysql
 import datetime
 import pymysql
@@ -12,11 +11,8 @@ class BikeDB:
         pass
 
     #--------------------------------------------------------------------------#
-    # Gets name and positional info for each station. 
+    # Returns name and positional info for each station in json format. 
     def station_info(self):
-        # Array that holds information relating to all stations. 
-        info = []
-
         # Getting current time, floored to half-hour.   
         time = self.current_time_floored()
 
@@ -40,66 +36,65 @@ class BikeDB:
         # Disconnecting from DB. 
         self.close()
 
-        # Accessing rows returned from query. 
+        # Accessing rows returned from query - formatting into json. 
         # SQL table is ordered in the data analytics stage, so no need to order results from the above two queries.
+        stations = []
         for row1, row2 in zip(c1, c2):
-            # Storing data in an instance of StationInfo class. 
-            info.append(StationInfo(row1[0], row1[1], row1[2], row2[0], row2[1]))
+            station = {
+                'name': row1[0],
+                'lat': row1[1],
+                'lng': row1[2],
+                'total': int(row2[0]),
+                'available': int(row2[1]),
+                'bikes': int(row2[0]) - int(row2[1])
+            }
+            stations.append(station)
 
         # Returning info 
-        return info
+        return jsonify({'stations': stations})
 
 
     #--------------------------------------------------------------------------#
     # Gets info for specific station for the whole day.
-    def get_day(self, station):
-        # Array that holds the whole days information. 
-        info = []
-
+    def occupancy_info(self, station):
         # Connecting to DB. 
         self.open()
 
         # Creating cursor. 
         c = self.conn.cursor()
         # Constructing SQL query. 
-        query = "SELECT bike_stands, available_bike_stands, time FROM HalfHourlyInfo WHERE address = '" + station + "'"
+        query = "SELECT bike_stands, available_bike_stands, time, weather FROM HalfHourlyInfo_WithWeather WHERE address = '" + station + "'"
         # Executing SQL query. 
         c.execute(query)
 
         # Disconnecting from DB. 
         self.close()
 
-        # Accessing rows returned from query. 
+        # Accessing rows returned from query - formatting into json. 
+        dry = []
+        wet = []
+        index = 0
         for row in c:
-            # Storing data in an instance of StandInfo class. 
-            info.append(StandInfo(row[0], row[1], row[2]))
+            half_hour = {
+                    'total': int(row[0]),
+                    'available': int(row[1]),
+                    'time': str(row[2])[0:-3],
+                    'bikes': int(row[0]) - int(row[1]),
+                }
+
+            # First 48 rows returned from query are for dry weather. 
+            if (index < 48):
+                dry.append(half_hour)
+            # Last 48 rows returned from query are for wet weather.
+            else:
+                wet.append(half_hour)
+
+            # Increment index
+            index += 1
 
         # Returning info 
-        return info
-
-
-    #--------------------------------------------------------------------------#
-    # Gets info for specific station at the current time
-    def get_now(self, station):
-        # Getting current time, floored to half-hour.   
-        time = self.current_time_floored()
-
-        # Connecting to DB. 
-        self.open()
-
-        # Creating cursor. 
-        c = self.conn.cursor()
-        # Constructing SQL query. 
-        query = "SELECT bike_stands, available_bike_stands, time FROM HalfHourlyInfo WHERE address = '" + station + "' AND time = '" + str(time) + "'"
-        # Executing SQL query. 
-        c.execute(query)
-
-        # Disconnecting from DB. 
-        self.close()
-
-        # Returning data in an instance of StandInfo class. 
-        for row in c:
-            return StandInfo(row[0], row[1], row[2])
+        current = self.current_time_floored_index()
+        return jsonify({'current_dry': dry[current], 'current_wet': wet[current], 'dry_day': dry, 'wet_day': wet})
 
 
     #--------------------------------------------------------------------------#
@@ -115,6 +110,13 @@ class BikeDB:
 
         # Creating and returning new datetime.time object. 
         return datetime.time(time.hour, minutes, 0)
+
+
+    #--------------------------------------------------------------------------#
+    # Returns the index of the current half hour - e.g. 0:30 == 1, 2:30 == 5
+    def current_time_floored_index(self):
+        time = self.current_time_floored()
+        return int(time.hour * 2 + time.minute / 30)
 
 
     #--------------------------------------------------------------------------#

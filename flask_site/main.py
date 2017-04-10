@@ -16,7 +16,7 @@ CORS(app)
 @app.route('/')
 def index():
     # Loading dry weather categories. 
-    f = open('data_analytics/data/dry_weather.txt', 'r')
+    f = open('data/dry_weather.txt', 'r')
     condition = ''
     dry_conditions = f.read().split('/')
 

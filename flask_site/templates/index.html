@@ -200,6 +200,7 @@
             $.getJSON('http://localhost:5000/api/stations', function(json) {
                 // Looping through elements in JSON file.
                 for (var i = 0; i < json.stations.length; i++) {
+                    var opacity = json.stations[i].available / json.stations[i].total;
                     // Creating Marker
                     var marker = new google.maps.Marker({
                         position: {lat: json.stations[i].lat, lng: json.stations[i].lng},
@@ -207,8 +208,8 @@
                             path: google.maps.SymbolPath.CIRCLE,
                             strokeColor: '#4682b4',
                             strokeWeight: 1.5,
-                            fillColor: '#b0c4de',
-                            fillOpacity: 0.5,
+                            fillColor: '#4682b4',
+                            fillOpacity: opacity,
                             scale: 8
                         },
                         map: map,});

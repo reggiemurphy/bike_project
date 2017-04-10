@@ -18,11 +18,13 @@ def test_live_weather():
     ok_(scrape_weather(), 'No Live Weather Update from Open Weather')
 
 
-# Insert more test functions here...
+def test_apostrophe_query():
+    """ Tests that query to stations with ' character returns information with escape character """
+
+    ok_(steven(), "Cannot query stations with \' character")
+
 
 # ---------------------------------------------------------------------- #
-
-
 def rds_connection():
     """ Tests if Connection to RDS Exists """
 
@@ -35,3 +37,21 @@ def rds_connection():
 
     except:
         return False
+
+
+# ---------------------------------------------------------------------- #
+def steven():
+    """ Tests query for 'def test_apostrophe_query()' """
+
+    conn = pymysql.connect(host='bikebikebaby2.c1ecxudgvgy2.us-west-2.rds.amazonaws.com',
+            user='administrator',
+            password='bikebikebaby2',
+            db='bikebikebaby2',
+            charset='utf8',)
+
+    c = conn.cursor()
+    query = "SELECT available_bike_stands FROM HalfHourlyInfo WHERE address = 'St. Stephen''s Green South';"
+    c.execute(query)
+    conn.close()
+
+    return c

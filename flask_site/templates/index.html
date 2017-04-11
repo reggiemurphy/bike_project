@@ -73,13 +73,10 @@
         //#--------------------------------------------------------------------------#//
         // Calls API for station json - draws graphs
         function update(station, mode) {
-            // Format URL for apostrophes so that you can query database
-            station = station.replace("'", "''");
             // API Call
             $.getJSON('http://localhost:5000/api/occupancy/' + encodeURIComponent(station), function(json) {
                 station_json = json;
                 // Setting heading (change back apostrophes)
-                station = station.replace("''", "'");
                 document.getElementById("heading").innerHTML = station;
                 button(mode);
                 draw(json, mode)

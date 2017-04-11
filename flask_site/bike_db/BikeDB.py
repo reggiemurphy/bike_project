@@ -60,6 +60,9 @@ class BikeDB:
         # Connecting to DB. 
         self.open()
 
+        # Account for ' character in queries
+        station = station.replace("'", "''")
+
         # Creating cursor. 
         c = self.conn.cursor()
         # Constructing SQL query. 

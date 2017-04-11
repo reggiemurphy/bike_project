@@ -21,7 +21,7 @@ def test_live_weather():
 def test_apostrophe_query():
     """ Tests that query to stations with ' character returns information with escape character """
 
-    ok_(steven(), "Cannot query stations with \' character")
+    ok_(stephens_green("St. Stephen's Green East"), "Cannot query stations with \' character")
 
 
 # ---------------------------------------------------------------------- #
@@ -40,7 +40,7 @@ def rds_connection():
 
 
 # ---------------------------------------------------------------------- #
-def steven():
+def stephens_green(station):
     """ Tests query for 'def test_apostrophe_query()' """
 
     conn = pymysql.connect(host='bikebikebaby2.c1ecxudgvgy2.us-west-2.rds.amazonaws.com',
@@ -50,7 +50,9 @@ def steven():
             charset='utf8',)
 
     c = conn.cursor()
-    query = "SELECT available_bike_stands FROM HalfHourlyInfo WHERE address = 'St. Stephen''s Green South';"
+
+    station = station.replace("'", "''")
+    query = "SELECT available_bike_stands FROM HalfHourlyInfo WHERE address = '" + station + "';"
     c.execute(query)
     conn.close()
 

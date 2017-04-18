@@ -226,17 +226,17 @@
 
         //#--------------------------------------------------------------------------#//
 
-{#        // Test test test test test test test test test test test#}
-{#        function giveAddress(){#}
-{#        $.getJSON('http://localhost:5000/api/stations', function(json) {#}
-{#            {#}
-{#                $.when($.ajax(getLocation(json))).then(function (i_am_data) {#}
-{#                    console.log(i_am_data);#}
-{#                    update(the_station_name, weather_mode);#}
-{#                });#}
-{#            }#}
-{#        })#}
-{#        }#}
+        // Test test test test test test test test test test test
+        function giveAddress(){
+        $.getJSON('http://localhost:5000/api/stations', function(json) {
+            {
+                $.when($.ajax(getLocation(json))).then(function (i_am_data) {
+                    console.log(i_am_data);
+                    update(the_station_name, weather_mode);
+                });
+            }
+        })
+        }
 
 {#        function giveAddress(){#}
 {#            return $#}

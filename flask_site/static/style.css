@@ -64,13 +64,12 @@ button {
     text-align: center;
     font-size: 12px;
     margin: 0;
-    margin-bottom: 30px;
     padding: 5px;
     float: left;
     width: calc(50%);
     outline: none;
     border: none;
-    /*transition-duration: 0.4s;*/
+    transition-duration: 0.4s;
 }
 
 button:hover{
@@ -87,6 +86,12 @@ button:focus{
     cursor: pointer;
     outline: none;
     border: none;
+}
+
+button#location_btn{
+    background: orange;
+    width: 100%;
+    margin-bottom: 30px;
 }
 
 p {

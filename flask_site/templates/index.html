@@ -19,8 +19,8 @@
 
         // Waiting until document is ready before we start using AJAX. 
         $(document).ready(function() {
-            // Initial station to be displayed.
-            var station = 'Heuston Station (Central)';
+
+
 
             // URL for API. 
             var openweather_api = 'http://api.openweathermap.org/data/2.5/weather?q=Dublin,IE&units=metric&APPID=e9b71166c5c433f0066ecbf407c8d9dc';
@@ -47,7 +47,10 @@
                 weather_summary(condition, temperature);
 
                 // Display station
-                update(station, weather_mode);
+{#                update(station, weather_mode);#}
+
+            // Sets the map to display either the closest station or the default ("James Street")
+            getLocation(weather_mode);
             });
         });
 
@@ -159,24 +162,74 @@
             return google.visualization.arrayToDataTable(array);
         }
 
-
-        //#--------------------------------------------------------------------------#//
+         //#--------------------------------------------------------------------------#//
         // Formats full day data for line graph.
         // Takes a JSON file as input, returns a DataTable.
         function formatDay(json) {
             // Array to hold values for line graph.
             var array = [['Time', 'Empty Spaces']];
-
             // Looping through elements in JSON file.
             for (var i = 0; i < json.length; i++) {
                 // Pushing an array of two elements (time, stands available) to array.
                 array.push([json[i].time, json[i].available]);
             }
-
             // Returning array, formatted as data table.
             return google.visualization.arrayToDataTable(array);
         }
 
+
+        //#--------------------------------------------------------------------------#//
+        // Gets the location of the user
+        function getLocation(weather_mode) {
+            // If the user has location on then call findNearestFunction
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position){
+                    findNearestStation(position, weather_mode)
+                }, showError(weather_mode));
+            } else {
+                 update("Greek Street", weather_mode);
+            }
+        }
+
+        //#--------------------------------------------------------------------------#//
+        // Gets the closest station to the user
+        // Takes user position & JSON file as input, returns a station name
+        function findNearestStation(position, weather_mode) {
+            $.getJSON('http://localhost:5000/api/stations', function (json) {
+                var userLat = position.coords.latitude;
+                var userLong = position.coords.longitude;
+                var min = 10000000000000000;
+                var closestStation = "";
+                var PI = Math.PI;
+
+                // Calculation to find the distance between each station and the users location
+                for (var i = 0; i < json.stations.length; i++) {
+                    var R = 6371e3; //  radius of the earth in metres
+                    var φ1 = userLat * (PI / 180);
+                    var φ2 = json.stations[i].lat * (PI / 180);
+                    var Δφ = (json.stations[i].lat - userLat) * (PI / 180);
+                    var Δλ = (json.stations[i].lng - userLong) * (PI / 180);
+
+                    var a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                        Math.cos(φ1) * Math.cos(φ2) *
+                        Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+                    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                    var d = R * c;
+
+                    if (d < min) {
+                        min = d;
+                        closestStation = json.stations[i].name;
+                    }
+                }
+                update(closestStation, weather_mode);
+            })
+        }
+
+        //#--------------------------------------------------------------------------#//
+        // Sets station to default in case user doesn't allow geolocation
+        function showError(weather_mode) {
+                 update("Greek Street", weather_mode);
+        }
 
         //#--------------------------------------------------------------------------#//
         // Google Map
@@ -190,11 +243,13 @@
             // Map options
             var mapOptions = {
                 center: myCenter, 
-                zoom: 13
+                zoom: 13,
+                disableDefaultUI: true
             };
 
             // Creating map
             var map = new google.maps.Map(mapCanvas, mapOptions);
+
 
             // API Call
             $.getJSON('http://localhost:5000/api/stations', function(json) {
@@ -212,7 +267,7 @@
                             fillOpacity: opacity,
                             scale: 8
                         },
-                        map: map,});
+                        map: map});
 
                     // Create infowindow on mouseover
                     var infowindow = new google.maps.InfoWindow();
@@ -281,7 +336,8 @@
             <!--Buttons-->
             <div class='buttons'>
                 <button id='dry_btn' onclick="button(0)">Dry</button>
-                <button id='wet_btn' onclick="button(1)"">Wet</button>
+                <button id='wet_btn' onclick="button(1)">Wet</button>
+                <button id='location_btn' onclick="getLocation()">Find My Nearest Station</button>
             </div>
             <!--Charts-->
             <h5>Current Occupancy</h5>

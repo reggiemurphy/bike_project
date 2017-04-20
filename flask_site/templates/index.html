@@ -20,11 +20,9 @@
         // Waiting until document is ready before we start using AJAX. 
         $(document).ready(function() {
 
-
-
             // URL for API. 
             var openweather_api = 'http://api.openweathermap.org/data/2.5/weather?q=Dublin,IE&units=metric&APPID=e9b71166c5c433f0066ecbf407c8d9dc';
-
+            showError(weather_mode);
             // API call to get current weather info.
             $.getJSON(openweather_api, function(json) {     
                 // Get current weather info
@@ -46,11 +44,8 @@
                 weather_icon(icon);
                 weather_summary(condition, temperature);
 
-                // Display station
-{#                update(station, weather_mode);#}
-
-            // Sets the map to display either the closest station or the default ("James Street")
-            getLocation(weather_mode);
+                // Sets the map to display either the closest station
+                getLocation(weather_mode);
             });
         });
 
@@ -80,7 +75,10 @@
             $.getJSON('http://localhost:5000/api/occupancy/' + encodeURIComponent(station), function(json) {
                 station_json = json;
                 // Setting heading (change back apostrophes)
+                document.getElementById("loader").innerHTML = '';
                 document.getElementById("heading").innerHTML = station;
+                document.getElementById("title1").innerHTML = 'Current Occupancy';
+                document.getElementById("title2").innerHTML = 'Occupancy By Time';
                 button(mode);
                 draw(json, mode)
             });
@@ -162,6 +160,7 @@
             return google.visualization.arrayToDataTable(array);
         }
 
+
          //#--------------------------------------------------------------------------#//
         // Formats full day data for line graph.
         // Takes a JSON file as input, returns a DataTable.
@@ -186,10 +185,13 @@
                 navigator.geolocation.getCurrentPosition(function(position){
                     findNearestStation(position, weather_mode)
                 }, showError(weather_mode));
-            } else {
-                 update("Greek Street", weather_mode);
+            } 
+            // If geolocation is not supported by browser.
+            else {
+                 showError(weather_mode);
             }
         }
+
 
         //#--------------------------------------------------------------------------#//
         // Gets the closest station to the user
@@ -225,11 +227,17 @@
             })
         }
 
+
         //#--------------------------------------------------------------------------#//
-        // Sets station to default in case user doesn't allow geolocation
+        // Shows error in case user doesn't allow geolocation
         function showError(weather_mode) {
-                 update("Greek Street", weather_mode);
+            //document.getElementById("current_chart_div").innerHTML="someContent"; 
+            document.getElementById("loader").innerHTML = '<object data="/static/your.svg" type="image/svg+xml"></object>';
+            document.getElementById("heading").innerHTML = '...';
+            document.getElementById("title1").innerHTML = 'Searching for nearest station...';
+            document.getElementById("title2").innerHTML = '<i>Location sharing required for this feature.</i>';
         }
+
 
         //#--------------------------------------------------------------------------#//
         // Google Map
@@ -249,7 +257,6 @@
 
             // Creating map
             var map = new google.maps.Map(mapCanvas, mapOptions);
-
 
             // API Call
             $.getJSON('http://localhost:5000/api/stations', function(json) {
@@ -337,12 +344,12 @@
             <div class='buttons'>
                 <button id='dry_btn' onclick="button(0)">Dry</button>
                 <button id='wet_btn' onclick="button(1)">Wet</button>
-                <button id='location_btn' onclick="getLocation()">Find My Nearest Station</button>
             </div>
             <!--Charts-->
-            <h5>Current Occupancy</h5>
+            <h5 id="title1"></h5>
 			<div id="current_chart_div"></div>
-            <h5>Occupancy By Time</h5>
+            <div id="loader"></div>
+            <h5 id="title2"></h5>
             <div id="day_chart_div"></div>
 		</div>
 

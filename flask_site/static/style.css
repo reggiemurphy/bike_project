@@ -36,6 +36,7 @@ h2 {
     margin: 0;
     padding: 10px;
     font-size: 14px;
+    height: 14px;
 }
 
 h3 {
@@ -58,12 +59,21 @@ h5 {
     padding: 0;
 }
 
+object {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    padding: 20px;
+    padding-top: 35px;
+}
+
 button {
     background: rgba(176,196,222, 0.4);
     color: #022b3a;
     text-align: center;
     font-size: 12px;
     margin: 0;
+    margin-bottom: 30px;
     padding: 5px;
     float: left;
     width: calc(50%);

@@ -122,6 +122,23 @@ li.active{
     cursor: pointer;
 }
 
+table th {
+    color: lightsteelblue;
+    padding-left: 10px;
+    padding-right: 10px;
+    text-align: center;
+}
+
+table td {
+    padding-left: 10px;
+    padding-right: 10px;
+    text-align: center;
+}
+
+table td.leg {
+    text-align: left;
+}
+
 div.top {
     background: #022b3a;
     border-top-left-radius: 10px;

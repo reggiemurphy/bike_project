@@ -1,8 +1,6 @@
 from flask import jsonify
 import pymysql
 import datetime
-import pymysql
-import datetime
 
 class BikeDB:
     '''Class that deals with querying DB.'''
@@ -29,24 +27,29 @@ class BikeDB:
         # Creating cursor. 
         c2 = self.conn.cursor()
         # Constructing SQL query. 
-        query = "SELECT bike_stands, available_bike_stands FROM HalfHourlyInfo WHERE time = '" + str(time) + "'"
+        query = "SELECT bike_stands, available_bike_stands FROM HalfHourlyInfo_WithWeather WHERE time = '" + str(time) + "'"
         # Executing SQL query. 
         c2.execute(query)
 
         # Disconnecting from DB. 
         self.close()
 
+        # Converting results to list
+        c2_list = list(c2)
+
         # Accessing rows returned from query - formatting into json. 
         # SQL table is ordered in the data analytics stage, so no need to order results from the above two queries.
         stations = []
-        for row1, row2 in zip(c1, c2):
+        for row1, row2, row3 in zip(c1, c2_list[:len(c2_list)//2], c2_list[len(c2_list)//2:]):
             station = {
                 'name': row1[0],
                 'lat': row1[1],
                 'lng': row1[2],
                 'total': int(row2[0]),
-                'available': int(row2[1]),
-                'bikes': int(row2[0]) - int(row2[1])
+                'dry_available': int(row2[1]),
+                'dry_bikes': int(row2[0]) - int(row2[1]),
+                'wet_available': int(row3[1]),
+                'wet_bikes': int(row3[0]) - int(row3[1]),
             }
             stations.append(station)
 

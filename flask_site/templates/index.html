@@ -66,7 +66,7 @@
         // Calls API for station json - draws graphs
         function update(station, mode) {
             // API Call
-            $.getJSON('http://localhost:5000/api/occupancy/' + encodeURIComponent(station), function(json) {
+            $.getJSON('http://ec2-54-191-218-183.us-west-2.compute.amazonaws.com:5000/api/occupancy/' + encodeURIComponent(station), function(json) {
                 station_json = json;
                 // Setting heading (change back apostrophes)
                 document.getElementById("heading").innerHTML = station;
@@ -194,10 +194,11 @@
             var map = new google.maps.Map(mapCanvas, mapOptions);
 
             // API Call
-            $.getJSON('http://localhost:5000/api/stations', function(json) {
+            $.getJSON('http://ec2-54-191-218-183.us-west-2.compute.amazonaws.com:5000/api/stations', function(json) {
                 // Looping through elements in JSON file.
                 for (var i = 0; i < json.stations.length; i++) {
-                    var opacity = json.stations[i].available / json.stations[i].total;
+                    // Setting opacity of marker
+                    var opacity = (json.stations[i].dry_available + json.stations[i].wet_available) / (json.stations[i].total * 2);
                     // Creating Marker
                     var marker = new google.maps.Marker({
                         position: {lat: json.stations[i].lat, lng: json.stations[i].lng},
@@ -215,10 +216,12 @@
                     var infowindow = new google.maps.InfoWindow();
 
                     // Contents of infowindow
-                    var html = '<h4>' + json.stations[i].name + '</h4>' +
-                        '<p><b style="padding-right: 5em;">Total Stands:</b>' + json.stations[i].total + '</p>' + 
-                        '<p><b style="padding-right: 3.1em;">Available Stands:</b>' + json.stations[i].available + '</p>' + 
-                        '<p><b style="padding-right: 0.025em;">Unavailable Stands:</b> &emsp;&emsp;' + json.stations[i].bikes + '</p>'
+                    var html = '<h4>' + json.stations[i].name + '</h4>' + '<table>' +
+                        '<tr><th></th><th>Dry</th><th>Wet</th></tr>' +
+                        "<tr><td class='leg'>Total Stands</td><td>" + json.stations[i].total + '</td><td>' + json.stations[i].total + '</td></tr>' +
+                        "<tr><td class='leg'>Available Stands</td><td>" + json.stations[i].dry_available + '</td><td>' + json.stations[i].wet_available + '</td></tr>' +
+                        "<tr><td class='leg'>Unavailable Stands</td><td>" + json.stations[i].dry_bikes + '</td><td>' + json.stations[i].wet_bikes + '</td></tr>' +
+                        '</table>';
                     marker.html = html;
 
                     // Name of station

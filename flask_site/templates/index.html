@@ -19,6 +19,10 @@
 
         // Waiting until document is ready before we start using AJAX. 
         $(document).ready(function() {
+            // Adding onclick functionality to weather buttons
+            $('.nav li').click(function(){
+                $(this).addClass('active').siblings().removeClass('active');
+            })
             // Initial station to be displayed.
             var station = 'Heuston Station (Central)';
 
@@ -46,30 +50,18 @@
                 weather_icon(icon);
                 weather_summary(condition, temperature);
 
+                // Setting correct weather button to active. 
+                if (weather_mode == 0) jQuery('#dry').addClass('active');
+                else jQuery('#wet').addClass('active');
+
                 // Display graphs
                 update(station, weather_mode);
             });
         });
 
 
-        //#--------------------------------------------------------------------------#//
-        // Display live weather Icon at initial time of page load
-        function weather_icon(icon) {
-            // Set variable for Icon Div
-            var icon_div = document.getElementById("weather_icon");
-            // Insert icon
-            icon_div.innerHTML = "<img src='http://openweathermap.org/img/w/" + icon + ".png'>";
-        }
 
-
-        //#--------------------------------------------------------------------------#//
-        // Display live weather summary at initial time of page load
-        function weather_summary(weather_sum, temperature) {
-            var temp = document.getElementById("weather_sum");
-            temp.innerHTML = '<i>' + temperature + 'c</i> <b>' + weather_sum + '</b>';
-        }
-
-
+        //========================= Update & Draw Functions =========================//
         //#--------------------------------------------------------------------------#//
         // Calls API for station json - draws graphs
         function update(station, mode) {
@@ -103,6 +95,8 @@
         }
 
 
+
+        //============================ Graphing Functions ============================//
         //#--------------------------------------------------------------------------#//
         // Draws the line graph, depicting occupancy for the full day.
         function drawPieChart(json) {
@@ -178,6 +172,8 @@
         }
 
 
+
+        //=============================== Map Function ===============================//
         //#--------------------------------------------------------------------------#//
         // Google Map
         function myMap() {
@@ -251,14 +247,33 @@
         }
 
 
+
+        //============================ Weather Functions ============================//
+        //#--------------------------------------------------------------------------#//
+        // Display live weather Icon at initial time of page load
+        function weather_icon(icon) {
+            // Set variable for Icon Div
+            var icon_div = document.getElementById("weather_icon");
+            // Insert icon
+            icon_div.innerHTML = "<img src='http://openweathermap.org/img/w/" + icon + ".png'>";
+        }
+
+
+        //#--------------------------------------------------------------------------#//
+        // Display live weather summary at initial time of page load
+        function weather_summary(weather_sum, temperature) {
+            var temp = document.getElementById("weather_sum");
+            temp.innerHTML = '<i>' + temperature + 'c</i> <b>' + weather_sum + '</b>';
+        }
+
+
         //#--------------------------------------------------------------------------#//
         // Button to switch between dry graphs and wet graphs
         function button(mode) {
             if (mode !== weather_mode) {
                 var button;
-                if (mode == 0) button = document.getElementById('dry_btn');
-                else if (mode == 1) button = document.getElementById('wet_btn');
-                button.setActive;
+                $(".btn").find(".active").removeClass("active");
+                this.focus();
                 weather_mode = mode;
                 draw(station_json, mode); 
             }
@@ -269,21 +284,23 @@
 	</head>
 
 	<body>
-        <nav>
-                <ul>
-                    <li><h1>Dublin Bikes</h1></li>
-                    <li><div id="weather_icon"></div></li>
-                    <li><div id="weather_sum"></div></li>
-                </ul>
-        </nav>
+        <div class='top'>
+            <h1>Dublin Bikes</h1>
+            <div id="weather_icon"></div>
+            <div id="weather_sum"></div>
+        </div>
 
 		<div class='left'>
             <h2 id='heading'></h2>
             <!--Buttons-->
-            <div class='buttons'>
-                <button id='dry_btn' onclick="button(0)">Dry</button>
-                <button id='wet_btn' onclick="button(1)">Wet</button>
-            </div>
+            <nav>
+                <ul class='nav'>
+                    <li id='dry' onclick="button(0)"><i>Dry</i></li>
+                    <li id='wet' onclick="button(1)"><i>Wet</i></li>
+                </ul>
+            </nav>
+                <!--<button id='dry_btn' onclick="button(0)"></button>
+                <button id='wet_btn' onclick="button(1)"></button>-->
             <!--Charts-->
             <h5 id="title1"></h5>
 			<div id="current_chart_div"></div>
